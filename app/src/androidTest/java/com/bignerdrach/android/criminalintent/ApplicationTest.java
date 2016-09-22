@@ -1,4 +1,4 @@
-package com.miwel.sample;
+package com.bignerdrach.android.criminalintent;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
