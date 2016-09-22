@@ -1,2 +1,0 @@
-# Sample
-Android Sample Project
