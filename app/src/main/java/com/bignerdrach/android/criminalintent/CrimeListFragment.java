@@ -1,5 +1,6 @@
 package com.bignerdrach.android.criminalintent;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -28,6 +29,20 @@ public class CrimeListFragment extends Fragment {
     private RecyclerView mCrimeRecyclerView;
     private CrimeAdapter mAdapter;
     private boolean mSubtitleVisible;
+    private CallBacks mCallBacks;
+
+    /*
+     * Required interface for hosting activities
+     */
+    public interface CallBacks {
+        void onCrimeSelected(Crime crime);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mCallBacks = (CallBacks) activity;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,13 +77,7 @@ public class CrimeListFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-//            Toast.makeText(getActivity(),
-//                    mCrime.getTitle() + " clicked!", Toast.LENGTH_SHORT)
-//                    .show();
-            //Intent intent = new Intent(getActivity(), CrimeActivity.class);
-            //Intent intent = CrimeActivity.newIntent(getActivity(), mCrime.getId());
-            Intent intent = CrimePagerActivity.newIntent(getActivity(), mCrime.getId());
-            startActivity(intent);
+            mCallBacks.onCrimeSelected(mCrime);
         }
     }
 
@@ -134,7 +143,13 @@ public class CrimeListFragment extends Fragment {
         outState.putBoolean(SAVED_SUBTITLE_VISIBLE, mSubtitleVisible);
     }
 
-    private void updateUI() {
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallBacks = null;
+    }
+
+    public void updateUI() {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
 
@@ -168,9 +183,8 @@ public class CrimeListFragment extends Fragment {
             case R.id.menu_item_new_crime:
                 Crime crime = new Crime();
                 CrimeLab.get(getActivity()).addCrime(crime);
-                Intent intent = CrimePagerActivity
-                        .newIntent(getActivity(), crime.getId());
-                startActivity(intent);
+                updateUI();
+                mCallBacks.onCrimeSelected(crime);
                 return true;
             case R.id.menu_item_show_subtitle:
                 mSubtitleVisible = !mSubtitleVisible;
